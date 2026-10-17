@@ -29,24 +29,24 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): SmtpState {
 	const off = (reason: string): SmtpState => ({ enabled: false, reason });
 	if (env.SMTP_DISABLED === "1" || env.SMTP_DISABLED === "true") return off("SMTP_DISABLED=1");
 	const raw = env.SMTP_URL?.trim();
-	if (!raw) return off("SMTP_URL absent");
+	if (!raw) return off("SMTP_URL not set");
 	let url: URL;
 	try {
 		url = new URL(raw);
 	} catch {
-		return off("SMTP_URL illisible");
+		return off("SMTP_URL is not a valid URL");
 	}
-	if (url.protocol !== "smtp:" && url.protocol !== "smtps:") return off(`SMTP_URL : schéma ${url.protocol} inconnu (smtp: ou smtps:)`);
-	if (!url.hostname) return off("SMTP_URL : serveur absent");
+	if (url.protocol !== "smtp:" && url.protocol !== "smtps:") return off(`SMTP_URL: unknown scheme ${url.protocol} (smtp: or smtps:)`);
+	if (!url.hostname) return off("SMTP_URL: no host");
 	const tls = url.searchParams.get("tls");
-	if (tls !== null && tls !== "none") return off(`SMTP_URL : tls=${tls} inconnu (seul tls=none existe)`);
+	if (tls !== null && tls !== "none") return off(`SMTP_URL: unknown tls=${tls} (only tls=none exists)`);
 	const security: Security = tls === "none" ? "none" : url.protocol === "smtps:" ? "tls" : "starttls";
-	if (security === "none" && env.NODE_ENV === "production") return off("SMTP_URL : tls=none refusé en production");
+	if (security === "none" && env.NODE_ENV === "production") return off("SMTP_URL: tls=none refused in production");
 	const port = url.port ? Number(url.port) : DEFAULT_PORTS[security];
 	const user = url.username ? decodeURIComponent(url.username) : undefined;
 	const password = url.password ? decodeURIComponent(url.password) : undefined;
 	const address = url.searchParams.get("from")?.trim() || (user?.includes("@") ? user : "");
-	if (!/^[^\s@<>"]+@[^\s@<>"]+$/.test(address)) return off("SMTP_URL : expéditeur absent ou invalide (from=adresse)");
+	if (!/^[^\s@<>"]+@[^\s@<>"]+$/.test(address)) return off("SMTP_URL: missing or invalid sender (from=address)");
 	const name = url.searchParams.get("name")?.trim();
 	// Quoted display name: commas, accents or quotes in it cannot split the address list.
 	const from = name ? `"${name.replace(/["\\]/g, "\\$&")}" <${address}>` : address;

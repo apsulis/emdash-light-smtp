@@ -29,9 +29,9 @@ const started = Date.now();
 try {
 	const id = await sendMail(config, {
 		to,
-		subject: `[emdash-simple-smtp] smoke test ${label} ${new Date().toISOString()}`,
-		text: `Smoke test sent through ${config.host}:${config.port} (${config.security}) by @apsulis/emdash-simple-smtp.`,
-		html: `<p>Smoke test sent through <strong>${config.host}:${config.port}</strong> (${config.security}) by @apsulis/emdash-simple-smtp.</p>`,
+		subject: `[emdash-light-smtp] smoke test ${label} ${new Date().toISOString()}`,
+		text: `Smoke test sent through ${config.host}:${config.port} (${config.security}) by @apsulis/emdash-light-smtp.`,
+		html: `<p>Smoke test sent through <strong>${config.host}:${config.port}</strong> (${config.security}) by @apsulis/emdash-light-smtp.</p>`,
 	});
 	console.log(`[${label}] accepted in ${Date.now() - started} ms, message id ${id}`);
 } catch (error) {

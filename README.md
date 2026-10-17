@@ -1,6 +1,8 @@
-# @apsulis/emdash-simple-smtp
+# @apsulis/emdash-light-smtp
 
-A minimal, hardened SMTP email provider for **self-hosted [EmDash](https://github.com/emdash-cms/emdash)** (Node.js).
+[![CI](https://github.com/apsulis/emdash-light-smtp/actions/workflows/ci.yml/badge.svg)](https://github.com/apsulis/emdash-light-smtp/actions/workflows/ci.yml)
+
+A light, hardened SMTP email provider for **self-hosted [EmDash](https://github.com/emdash-cms/emdash)** (Node.js).
 It delivers EmDash's emails (magic links, invitations, plugin mail) through any SMTP relay: Mailjet, Sweego,
 Brevo, Amazon SES, Cloudflare Email Service, your own server…
 
@@ -20,16 +22,16 @@ On Cloudflare Workers, use EmDash's `cloudflareEmail()` plugin instead.
 ## Install
 
 ```bash
-pnpm add @apsulis/emdash-simple-smtp
+pnpm add @apsulis/emdash-light-smtp
 ```
 
 ```js
 // astro.config.mjs
 import emdash from "emdash/astro";
-import emdashSimpleSmtp from "@apsulis/emdash-simple-smtp";
+import emdashLightSmtp from "@apsulis/emdash-light-smtp";
 
 export default defineConfig({
-	integrations: [emdash({ /* … */ plugins: [emdashSimpleSmtp()] })],
+	integrations: [emdash({ /* … */ plugins: [emdashLightSmtp()] })],
 });
 ```
 
@@ -80,7 +82,7 @@ Both would work with any email provider, not only this one.
 
 ## Logs
 
-One line at startup (`[emdash-simple-smtp] actif : host:port (mode), expéditeur …` or `coupé : reason`), then
+One line at startup (`[emdash-light-smtp] active: host:port (mode), sender …` or `off: reason`), then
 one line per email with recipient and subject. Message bodies (which contain sign-in links) and credentials are
 never logged.
 
@@ -92,6 +94,10 @@ pnpm typecheck
 pnpm test        # unit tests + integration against a local SMTP server (needs openssl for a throw-away certificate)
 pnpm pack        # builds dist/ and produces the npm tarball
 ```
+
+Issues and pull requests are welcome: keep it light. A feature belongs here only if every self-hosted EmDash
+site sending email through SMTP needs it; anything else is a separate plugin (see above). Security issues:
+see [SECURITY.md](SECURITY.md).
 
 ## License
 

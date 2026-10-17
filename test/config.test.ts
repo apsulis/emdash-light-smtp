@@ -6,7 +6,7 @@ const url = (value: string, extra: Record<string, string> = {}) => readConfig({ 
 
 describe("readConfig (SMTP_URL)", () => {
 	it("is off without SMTP_URL (empty .env of a fresh clone)", () => {
-		expect(readConfig({})).toEqual({ enabled: false, reason: "SMTP_URL absent" });
+		expect(readConfig({})).toEqual({ enabled: false, reason: "SMTP_URL not set" });
 	});
 
 	it("SMTP_DISABLED=1 wins over a complete configuration", () => {
@@ -30,14 +30,14 @@ describe("readConfig (SMTP_URL)", () => {
 	});
 
 	it("refuses plain text in production, accepts it elsewhere", () => {
-		expect(url("smtp://localhost:1025?from=a@example.test&tls=none", { NODE_ENV: "production" })).toEqual({ enabled: false, reason: "SMTP_URL : tls=none refusé en production" });
+		expect(url("smtp://localhost:1025?from=a@example.test&tls=none", { NODE_ENV: "production" })).toEqual({ enabled: false, reason: "SMTP_URL: tls=none refused in production" });
 		expect(url("smtp://localhost:1025?from=a@example.test&tls=none", { NODE_ENV: "development" })).toMatchObject({ enabled: true, config: { security: "none", port: 1025 } });
 	});
 
 	it("is off on invalid settings instead of guessing", () => {
-		expect(url("not a url")).toEqual({ enabled: false, reason: "SMTP_URL illisible" });
+		expect(url("not a url")).toEqual({ enabled: false, reason: "SMTP_URL is not a valid URL" });
 		expect(url("https://smtp.example.test?from=a@example.test")).toMatchObject({ enabled: false });
 		expect(url("smtp://smtp.example.test?from=a@example.test&tls=off")).toMatchObject({ enabled: false });
-		expect(url("smtp://key:secret@smtp.example.test")).toEqual({ enabled: false, reason: "SMTP_URL : expéditeur absent ou invalide (from=adresse)" });
+		expect(url("smtp://key:secret@smtp.example.test")).toEqual({ enabled: false, reason: "SMTP_URL: missing or invalid sender (from=address)" });
 	});
 });

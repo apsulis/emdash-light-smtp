@@ -6,7 +6,7 @@ import { PLUGIN_ID, VERSION } from "./index.js";
 import { redact, sendMail } from "./transport.js";
 
 const ADMIN = 50;
-const ANNOUNCED = Symbol.for("emdash-simple-smtp:announced");
+const ANNOUNCED = Symbol.for("emdash-light-smtp:announced");
 
 type Caller = { email: string; role: number } | undefined;
 type LastTest = { at: string; to: string; ok: boolean; message: string };
@@ -25,9 +25,9 @@ export function createPlugin() {
 		g[ANNOUNCED] = true;
 		if (state.enabled) {
 			const { host, port, security, from } = state.config;
-			console.info(`[emdash-simple-smtp] actif : ${host}:${port} (${security}), expéditeur ${from}`);
+			console.info(`[emdash-light-smtp] active: ${host}:${port} (${security}), sender ${from}`);
 		} else {
-			console.warn(`[emdash-simple-smtp] coupé : ${state.reason}. Aucun e-mail ne sera envoyé par cette extension.`);
+			console.warn(`[emdash-light-smtp] off: ${state.reason}. This plugin will not send any email.`);
 		}
 	}
 
@@ -41,11 +41,11 @@ export function createPlugin() {
 						const { message } = event;
 						try {
 							await sendMail(state.config, event.message as Parameters<typeof sendMail>[1]);
-							ctx.log.info(`e-mail envoyé à ${message.to} (« ${message.subject} »)`);
+							ctx.log.info(`email sent to ${message.to} ("${message.subject}")`);
 						} catch (error) {
 							const reason = errorText(error, state.config);
-							ctx.log.warn(`échec de l'envoi à ${message.to} (« ${message.subject} ») : ${reason}`);
-							throw new Error(`SMTP : ${reason}`);
+							ctx.log.warn(`failed to send to ${message.to} ("${message.subject}"): ${reason}`);
+							throw new Error(`SMTP: ${reason}`);
 						}
 					},
 				},
@@ -56,13 +56,13 @@ export function createPlugin() {
 		const last = await ctx.kv.get<LastTest>("lastTest");
 		const fields = state.enabled
 			? [
-					{ label: "État", value: "actif" },
-					{ label: "Serveur", value: `${state.config.host}:${state.config.port} (${state.config.security})` },
-					{ label: "Expéditeur", value: state.config.from },
+					{ label: "State", value: "active" },
+					{ label: "Server", value: `${state.config.host}:${state.config.port} (${state.config.security})` },
+					{ label: "Sender", value: state.config.from },
 				]
-			: [{ label: "État", value: `coupé : ${state.reason}` }];
-		if (last) fields.push({ label: "Dernier test", value: `${last.at.slice(0, 16).replace("T", " ")} UTC · ${last.to} · ${last.ok ? "envoyé" : "échec"} · ${last.message}` });
-		const actions = state.enabled ? [{ type: "actions", elements: [{ type: "button", action_id: "test", label: "Envoyer un e-mail de test", style: "primary" }] }] : [];
+			: [{ label: "State", value: `off: ${state.reason}` }];
+		if (last) fields.push({ label: "Last test", value: `${last.at.slice(0, 16).replace("T", " ")} UTC · ${last.to} · ${last.ok ? "sent" : "failed"} · ${last.message}` });
+		const actions = state.enabled ? [{ type: "actions", elements: [{ type: "button", action_id: "test", label: "Send a test email", style: "primary" }] }] : [];
 		return { blocks: [{ type: "fields", fields }, ...actions] };
 	}
 
@@ -70,7 +70,7 @@ export function createPlugin() {
 		id: PLUGIN_ID,
 		version: VERSION,
 		capabilities: ["hooks.email-transport:register"],
-		admin: { widgets: [{ id: "status", title: "E-mail (SMTP)", size: "half" }] },
+		admin: { widgets: [{ id: "status", title: "Email (SMTP)", size: "half" }] },
 		hooks: deliver,
 		routes: {
 			admin: {
@@ -78,21 +78,21 @@ export function createPlugin() {
 				permission: "content:read",
 				handler: async (ctx) => {
 					const user = ctx.user as Caller;
-					if (!user || user.role < ADMIN) return { blocks: [{ type: "context", text: "Réservé aux administrateurs." }] };
+					if (!user || user.role < ADMIN) return { blocks: [{ type: "context", text: "Administrators only." }] };
 					const input = (ctx.input ?? {}) as { type?: string; action_id?: string };
 					if (input.type !== "block_action" || input.action_id !== "test" || !state.enabled) return widget(ctx);
 					const at = new Date().toISOString();
 					let last: LastTest;
 					try {
-						const subject = "E-mail de test EmDash (SMTP)";
-						const text = `E-mail de test envoyé depuis l'administration EmDash par emdash-simple-smtp, le ${at}.`;
+						const subject = "EmDash test email (SMTP)";
+						const text = `Test email sent from the EmDash admin by emdash-light-smtp on ${at}.`;
 						const id = await sendMail(state.config, { to: user.email, subject, text });
-						last = { at, to: user.email, ok: true, message: `accepté par le serveur (${id})` };
+						last = { at, to: user.email, ok: true, message: `accepted by the server (${id})` };
 					} catch (error) {
 						last = { at, to: user.email, ok: false, message: errorText(error, state.config) };
 					}
 					await ctx.kv.set("lastTest", last);
-					ctx.log.info(`e-mail de test à ${user.email} : ${last.ok ? "envoyé" : `échec : ${last.message}`}`);
+					ctx.log.info(`test email to ${user.email}: ${last.ok ? "sent" : `failed: ${last.message}`}`);
 					return { ...(await widget(ctx)), toast: { type: last.ok ? "success" : "error", message: last.message } };
 				},
 			},

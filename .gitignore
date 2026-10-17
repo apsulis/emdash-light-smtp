@@ -12,6 +12,8 @@
 !src/**
 !test/**
 !scripts/**
+!.github/**
+!SECURITY.md
 node_modules/
 dist/
 *.tgz

@@ -1,17 +1,44 @@
 {
-	"name": "@apsulis/emdash-simple-smtp",
+	"name": "@apsulis/emdash-light-smtp",
 	"version": "0.1.0",
-	"description": "Minimal, hardened SMTP email provider for self-hosted EmDash (Node.js): environment-only configuration, mandatory TLS, safe off switch.",
+	"description": "Light, hardened SMTP email provider for self-hosted EmDash (Node.js): one-line configuration, mandatory TLS, safe off switch.",
 	"license": "MIT",
-	"author": "Apsulis",
-	"type": "module",
-	"keywords": ["emdash", "emdash-plugin", "smtp", "email", "nodemailer"],
-	"exports": {
-		".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-		"./plugin": { "types": "./dist/plugin.d.ts", "default": "./dist/plugin.js" }
+	"author": "Apsulis (https://www.apsulis.com)",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/apsulis/emdash-light-smtp.git"
 	},
-	"files": ["dist", "README.md", "LICENSE"],
-	"engines": { "node": ">=22" },
+	"homepage": "https://github.com/apsulis/emdash-light-smtp#readme",
+	"bugs": {
+		"url": "https://github.com/apsulis/emdash-light-smtp/issues"
+	},
+	"type": "module",
+	"keywords": [
+		"emdash",
+		"emdash-plugin",
+		"smtp",
+		"email",
+		"nodemailer"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./plugin": {
+			"types": "./dist/plugin.d.ts",
+			"default": "./dist/plugin.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		"CHANGELOG.md"
+	],
+	"engines": {
+		"node": ">=22"
+	},
 	"scripts": {
 		"build": "tsc -p tsconfig.json",
 		"typecheck": "tsc -p tsconfig.json --noEmit",
@@ -30,6 +57,10 @@
 		"smtp-server": "3.19.22",
 		"typescript": "6.0.3",
 		"vitest": "5.0.5"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
 	},
 	"packageManager": "pnpm@12.11.2"
 }

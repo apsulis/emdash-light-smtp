@@ -8,7 +8,7 @@ import { SMTPServer, type SMTPServerOptions } from "smtp-server";
 
 /** Throw-away certificate authority + certificate for "localhost" (tests only). */
 export function selfSignedCert(): { key: Buffer; cert: Buffer } {
-	const dir = mkdtempSync(join(tmpdir(), "simple-smtp-"));
+	const dir = mkdtempSync(join(tmpdir(), "light-smtp-"));
 	try {
 		execFileSync("openssl", [
 			"req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "1", "-subj", "/CN=localhost",
