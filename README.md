@@ -71,6 +71,17 @@ No redirection of all mail to a test address, no recipient allow-list, no send l
 attachments or DKIM signing (your relay signs). Keep a copy of production `.env` files out of local machines;
 to work locally, leave `SMTP_HOST` empty or set `SMTP_DISABLED=1`.
 
+If a project needs them later, they belong in separate, provider-agnostic plugins rather than in this one.
+EmDash 1.3.0 sends every email through `email:beforeSend` (can rewrite or cancel), `email:deliver` (this plugin)
+and `email:afterSend` (fire-and-forget), and system emails (sign-in links, invites) skip the first and last
+stages. So:
+
+- a **redirect** plugin on `email:beforeSend` would reroute form notifications on a staging site while sign-in
+  links still reach the right person;
+- a **send log** plugin on `email:afterSend` would never see a sign-in link.
+
+Both would work with any email provider, not only this one.
+
 ## Logs
 
 One line at startup (`[emdash-simple-smtp] actif : host:port (mode), expéditeur …` or `coupé : reason`), then
