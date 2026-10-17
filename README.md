@@ -4,12 +4,12 @@ A minimal, hardened SMTP email provider for **self-hosted [EmDash](https://githu
 It delivers EmDash's emails (magic links, invitations, plugin mail) through any SMTP relay: Mailjet, Sweego,
 Brevo, Amazon SES, Cloudflare Email Service, your own server…
 
-- **Configuration from environment variables only.** Nothing is stored in the database, so credentials never
+- **One environment variable, one line:** `SMTP_URL`. Nothing is stored in the database, so credentials never
   end up in backups or site exports, and a fresh clone with an empty `.env` sends nothing.
 - **TLS is mandatory and verified** (TLS 1.2 minimum), either implicit TLS (port 465) or STARTTLS that the
   server must offer (port 587, no fallback to plain text). Plain text exists only outside production, for a
   local catcher such as [Mailpit](https://mailpit.axllent.org/).
-- **A single off switch.** No `SMTP_HOST`, or `SMTP_DISABLED=1`: the plugin does not register an email
+- **A single off switch.** No `SMTP_URL`, or `SMTP_DISABLED=1`: the plugin does not register an email
   provider at all, so nothing can leave, and EmDash keeps its own fallbacks (copy the invite link by hand).
 - **One runtime dependency:** [nodemailer](https://nodemailer.com/), pinned.
 - A small dashboard widget for administrators: state, server, sender, and a **Send a test email** button.
@@ -37,39 +37,35 @@ When it is the only email provider, EmDash selects it automatically (otherwise: 
 
 ## Configuration
 
-| Variable | Required | Meaning |
-|---|---|---|
-| `SMTP_HOST` | yes | SMTP server. Unset = off. |
-| `SMTP_PORT` | no | Defaults to 465 (`tls`), 587 (`starttls`), 25 (`none`). |
-| `SMTP_SECURE` | no | `tls` (implicit TLS), `starttls` (STARTTLS required) or `none` (plain text, refused when `NODE_ENV=production`). Defaults to `tls` on port 465, `starttls` otherwise. |
-| `SMTP_USER`, `SMTP_PASSWORD` | if the server needs them | Credentials. Never logged: masked in error messages. |
-| `SMTP_FROM` | yes | Sender, `Name <address>` accepted. Use an address of a domain authorised (SPF, DKIM) at your provider. |
-| `SMTP_DISABLED` | no | `1` turns everything off, whatever else is set. |
-
-Invalid settings turn the plugin off rather than guessing; the reason is logged once at startup and shown in
-the widget.
-
 ```dotenv
-# Production (example: Mailjet over STARTTLS)
-SMTP_HOST=in-v3.mailjet.com
-SMTP_PORT=587
-SMTP_SECURE=starttls
-SMTP_USER=…
-SMTP_PASSWORD=…
-SMTP_FROM=Example <noreply@example.com>
-
+# Implicit TLS (port 465 by default)
+SMTP_URL=smtps://USER:PASSWORD@smtp.example.com?from=noreply@example.com&name=Example
+# STARTTLS, required (port 587 by default)
+SMTP_URL=smtp://USER:PASSWORD@in-v3.mailjet.com:587?from=noreply@example.com&name=Example
 # Local development with Mailpit (docker run -p 8025:8025 -p 1025:1025 axllent/mailpit)
-SMTP_HOST=localhost
-SMTP_PORT=1025
-SMTP_SECURE=none
-SMTP_FROM=Dev <noreply@example.test>
+SMTP_URL=smtp://localhost:1025?from=noreply@example.test&tls=none
+# Turns everything off, whatever SMTP_URL says
+SMTP_DISABLED=1
 ```
+
+| Part | Meaning |
+|---|---|
+| `smtps://` / `smtp://` | Implicit TLS / STARTTLS that the server must offer. Both verify the certificate, TLS 1.2 minimum. |
+| `USER:PASSWORD` | Optional. **Percent-encode** them (`encodeURIComponent`): `@` is `%40`, `:` is `%3A`, `/` is `%2F`, `#` is `%23`, `%` is `%25`. Never logged: masked in error messages. |
+| `:port` | Optional: 465 for `smtps`, 587 for `smtp`. |
+| `from=` | Sender address, of a domain authorised (SPF, DKIM) at your provider. Optional when the user is itself an address (mailbox providers such as OVH). |
+| `name=` | Optional display name, accents and spaces allowed. |
+| `tls=none` | Plain text, for a local catcher only: refused when `NODE_ENV=production`. |
+
+The URL is read by the WHATWG URL parser built into Node, then turned into the same settings whatever the
+form. Invalid settings turn the plugin off rather than guessing; the reason is logged once at startup and
+shown in the widget.
 
 ## What it deliberately does not do
 
 No redirection of all mail to a test address, no recipient allow-list, no send log, no templates, queues,
 attachments or DKIM signing (your relay signs). Keep a copy of production `.env` files out of local machines;
-to work locally, leave `SMTP_HOST` empty or set `SMTP_DISABLED=1`.
+to work locally, leave `SMTP_URL` empty or set `SMTP_DISABLED=1`.
 
 If a project needs them later, they belong in separate, provider-agnostic plugins rather than in this one.
 EmDash 1.3.0 sends every email through `email:beforeSend` (can rewrite or cancel), `email:deliver` (this plugin)

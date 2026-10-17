@@ -8,7 +8,7 @@ vi.mock("emdash", () => ({ definePlugin: (definition: unknown) => definition }))
 const { createPlugin } = await import("../src/plugin.js");
 
 type Plugin = ReturnType<typeof createPlugin> & Record<string, any>;
-const ENV_KEYS = ["SMTP_HOST", "SMTP_PORT", "SMTP_SECURE", "SMTP_USER", "SMTP_PASSWORD", "SMTP_FROM", "SMTP_DISABLED", "NODE_ENV"];
+const ENV_KEYS = ["SMTP_URL", "SMTP_DISABLED", "NODE_ENV"];
 
 function fakeCtx(user?: { email: string; role: number }, input?: unknown) {
 	const logs: string[] = [];
@@ -49,18 +49,18 @@ describe("plugin", () => {
 		expect(plugin.hooks["email:deliver"]).toBeUndefined();
 		createPlugin();
 		expect(warn).toHaveBeenCalledTimes(1);
-		expect(warn.mock.calls[0][0]).toContain("coupé : SMTP_HOST absent");
+		expect(warn.mock.calls[0][0]).toContain("coupé : SMTP_URL absent");
 	});
 
 	it("SMTP_DISABLED=1 removes the hook even with a full configuration", () => {
 		vi.spyOn(console, "warn").mockImplementation(() => {});
-		const plugin = withEnv({ SMTP_HOST: "localhost", SMTP_SECURE: "none", SMTP_PORT: String(server.port), SMTP_FROM: "a@example.test", SMTP_DISABLED: "1" });
+		const plugin = withEnv({ SMTP_URL: `smtp://localhost:${server.port}?from=a@example.test&tls=none`, SMTP_DISABLED: "1" });
 		expect(plugin.hooks["email:deliver"]).toBeUndefined();
 	});
 
 	it("delivers through the hook; logs carry neither the body nor secrets", async () => {
 		const info = vi.spyOn(console, "info").mockImplementation(() => {});
-		const plugin = withEnv({ SMTP_HOST: "localhost", SMTP_SECURE: "none", SMTP_PORT: String(server.port), SMTP_USER: "user-secret-id", SMTP_PASSWORD: "pw-secret", SMTP_FROM: "Site <noreply@example.test>", NODE_ENV: "test" });
+		const plugin = withEnv({ SMTP_URL: `smtp://user-secret-id:pw-secret@localhost:${server.port}?from=noreply@example.test&name=Site&tls=none`, NODE_ENV: "test" });
 		const hook = plugin.hooks["email:deliver"];
 		expect(hook).toMatchObject({ exclusive: true, timeout: 30_000 });
 		const { ctx, logs } = fakeCtx();
@@ -74,7 +74,7 @@ describe("plugin", () => {
 
 	it("a failed delivery is logged redacted and rethrown", async () => {
 		vi.spyOn(console, "info").mockImplementation(() => {});
-		const plugin = withEnv({ SMTP_HOST: "localhost", SMTP_SECURE: "none", SMTP_PORT: "1", SMTP_USER: "user-secret-id", SMTP_PASSWORD: "pw-secret", SMTP_FROM: "a@example.test", NODE_ENV: "test" });
+		const plugin = withEnv({ SMTP_URL: "smtp://user-secret-id:pw-secret@localhost:1?from=a@example.test&tls=none", NODE_ENV: "test" });
 		const { ctx, logs } = fakeCtx();
 		await expect(plugin.hooks["email:deliver"].handler({ message: { to: "x@example.test", subject: "S", text: "BODY" } }, ctx)).rejects.toThrow(/^SMTP : /);
 		expect(logs.join("\n")).not.toMatch(/BODY|pw-secret|user-secret-id/);
@@ -82,7 +82,7 @@ describe("plugin", () => {
 
 	it("widget: administrators only; the test email goes to the signed-in administrator", async () => {
 		vi.spyOn(console, "info").mockImplementation(() => {});
-		const plugin = withEnv({ SMTP_HOST: "localhost", SMTP_SECURE: "none", SMTP_PORT: String(server.port), SMTP_FROM: "a@example.test", NODE_ENV: "test" });
+		const plugin = withEnv({ SMTP_URL: `smtp://localhost:${server.port}?from=a@example.test&tls=none`, NODE_ENV: "test" });
 		const route = plugin.routes.admin.handler;
 		const editor = fakeCtx({ email: "editor@example.test", role: 40 }, { type: "block_action", action_id: "test" });
 		const before = server.received.length;

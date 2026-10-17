@@ -3,7 +3,7 @@ import type { PluginDescriptor } from "emdash";
 export const PLUGIN_ID = "simple-smtp";
 export const VERSION = "0.1.0";
 
-/** Descriptor for `emdash({ plugins: [emdashSimpleSmtp()] })`. Configuration: SMTP_* environment variables. */
+/** Descriptor for `emdash({ plugins: [emdashSimpleSmtp()] })`. Configuration: the SMTP_URL environment variable (see README). */
 export function emdashSimpleSmtp(): PluginDescriptor {
 	return {
 		id: PLUGIN_ID,

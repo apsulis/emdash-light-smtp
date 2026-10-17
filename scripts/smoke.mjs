@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * Smoke test against a real SMTP relay, through the plugin's own code path (readConfig + sendMail:
- * TLS required, certificate verified). Reads SMTP_* from the environment, sends one message to
+ * TLS required, certificate verified). Reads SMTP_URL from the environment, sends one message to
  * SMOKE_TO, prints the outcome. Credentials are never printed.
  *
- *   pnpm build && SMTP_HOST=… SMTP_PORT=… SMTP_USER=… SMTP_PASSWORD=… SMTP_FROM=… SMOKE_TO=you@example.org node scripts/smoke.mjs
+ *   pnpm build && SMTP_URL='smtps://user:password@host?from=…' SMOKE_TO=you@example.org node scripts/smoke.mjs
  */
 import { readConfig } from "../dist/config.js";
 import { redact, sendMail } from "../dist/transport.js";

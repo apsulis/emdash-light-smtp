@@ -14,7 +14,7 @@ type LastTest = { at: string; to: string; ok: boolean; message: string };
 const errorText = (error: unknown, config: SmtpConfig) => redact(error instanceof Error ? error.message : String(error), config);
 
 /**
- * Native plugin. Active: provides the exclusive `email:deliver` hook over SMTP. Off (no SMTP_HOST,
+ * Native plugin. Active: provides the exclusive `email:deliver` hook over SMTP. Off (no SMTP_URL,
  * SMTP_DISABLED=1, invalid settings): the hook is not registered at all, so nothing can leave and
  * EmDash keeps its own fallbacks (copy the invite link, magic link unavailable).
  */
