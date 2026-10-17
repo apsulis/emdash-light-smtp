@@ -1,0 +1,17 @@
+# Allow-list (Apsulis rule): everything is ignored except what is listed here.
+*
+!*/
+!.gitignore
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.json
+!README.md
+!LICENSE
+!CHANGELOG.md
+!src/**
+!test/**
+node_modules/
+dist/
+*.tgz
+.DS_Store

@@ -1,0 +1,35 @@
+{
+	"name": "@apsulis/emdash-simple-smtp",
+	"version": "0.1.0",
+	"description": "Minimal, hardened SMTP email provider for self-hosted EmDash (Node.js): environment-only configuration, mandatory TLS, safe off switch.",
+	"license": "MIT",
+	"author": "Apsulis",
+	"type": "module",
+	"keywords": ["emdash", "emdash-plugin", "smtp", "email", "nodemailer"],
+	"exports": {
+		".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+		"./plugin": { "types": "./dist/plugin.d.ts", "default": "./dist/plugin.js" }
+	},
+	"files": ["dist", "README.md", "LICENSE"],
+	"engines": { "node": ">=22" },
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"test": "vitest run",
+		"prepack": "pnpm build"
+	},
+	"peerDependencies": {
+		"emdash": ">=1.3.0 <2"
+	},
+	"dependencies": {
+		"nodemailer": "10.1.1"
+	},
+	"devDependencies": {
+		"@types/node": "26.6.5",
+		"emdash": "1.3.0",
+		"smtp-server": "3.19.22",
+		"typescript": "6.0.3",
+		"vitest": "5.0.5"
+	},
+	"packageManager": "pnpm@12.11.2"
+}
