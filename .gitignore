@@ -11,6 +11,7 @@
 !CHANGELOG.md
 !src/**
 !test/**
+!scripts/**
 node_modules/
 dist/
 *.tgz
