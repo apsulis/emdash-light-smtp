@@ -1,5 +1,6 @@
 # @apsulis/emdash-light-smtp
 
+[![npm](https://img.shields.io/npm/v/@apsulis/emdash-light-smtp)](https://www.npmjs.com/package/@apsulis/emdash-light-smtp)
 [![CI](https://github.com/apsulis/emdash-light-smtp/actions/workflows/ci.yml/badge.svg)](https://github.com/apsulis/emdash-light-smtp/actions/workflows/ci.yml)
 
 A light, hardened SMTP email provider for **self-hosted [EmDash](https://github.com/emdash-cms/emdash)** (Node.js).
@@ -94,6 +95,9 @@ pnpm typecheck
 pnpm test        # unit tests + integration against a local SMTP server (needs openssl for a throw-away certificate)
 pnpm pack        # builds dist/ and produces the npm tarball
 ```
+
+Releases: a GitHub release stages the version on npm with provenance (trusted publishing, no token); it goes
+live only once a maintainer approves it with two-factor authentication.
 
 Issues and pull requests are welcome: keep it light. A feature belongs here only if every self-hosted EmDash
 site sending email through SMTP needs it; anything else is a separate plugin (see above). Security issues:

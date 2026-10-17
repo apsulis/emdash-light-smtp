@@ -1,6 +1,6 @@
 {
 	"name": "@apsulis/emdash-light-smtp",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Light, hardened SMTP email provider for self-hosted EmDash (Node.js): one-line configuration, mandatory TLS, safe off switch.",
 	"license": "MIT",
 	"author": "Apsulis (https://www.apsulis.com)",

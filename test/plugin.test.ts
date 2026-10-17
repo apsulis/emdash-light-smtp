@@ -104,3 +104,12 @@ describe("plugin", () => {
 		expect(out).not.toContain("Send a test email");
 	});
 });
+
+describe("descriptor", () => {
+	it("reports the package version", async () => {
+		const { VERSION } = await import("../src/index.js");
+		const { readFileSync } = await import("node:fs");
+		const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as { version: string };
+		expect(VERSION).toBe(pkg.version);
+	});
+});
